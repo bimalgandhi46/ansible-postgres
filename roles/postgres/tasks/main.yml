@@ -1,0 +1,35 @@
+---
+# roles/postgres_install/tasks/main.yml
+
+- name: Ensure apt cache is updated
+  apt:
+    update_cache: yes
+
+- name: Disable auto cluster creation
+  copy:
+    dest: /etc/postgresql-common/createcluster.conf
+    content: "create_main_cluster = false\n"
+
+- name: Install PostgreSQL packages
+  apt:
+    name:
+      - postgresql-16
+      - postgresql-client-16
+      - postgresql-common
+    state: present
+
+- name: Verify psql binary exists
+  command: psql --version
+  register: psql_version
+  changed_when: false
+
+- debug:
+    msg: "PostgreSQL installed: {{ psql_version.stdout }}"
+
+- name: Check clusters (should be none after install)
+  command: pg_lsclusters
+  register: cluster_list
+  changed_when: false
+
+- debug:
+    msg: "Clusters present: {{ cluster_list.stdout }}"
