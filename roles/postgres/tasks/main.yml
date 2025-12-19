@@ -5,11 +5,6 @@
   apt:
     update_cache: yes
 
-- name: Disable auto cluster creation
-  copy:
-    dest: /etc/postgresql-common/createcluster.conf
-    content: "create_main_cluster = false\n"
-
 - name: Install PostgreSQL packages
   apt:
     name:
@@ -17,6 +12,18 @@
       - postgresql-client-16
       - postgresql-common
     state: present
+
+- name: Ensure postgresql-common directory exists
+  file:
+    path: /etc/postgresql-common
+    state: directory
+    mode: '0755'
+
+- name: Disable auto cluster creation
+  copy:
+    dest: /etc/postgresql-common/createcluster.conf
+    content: "create_main_cluster = false\n"
+    mode: '0644'
 
 - name: Verify psql binary exists
   command: psql --version
